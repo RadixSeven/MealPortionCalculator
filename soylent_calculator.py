@@ -57,7 +57,7 @@ def main():
     print(f"HLTH Code dry mass: {total_hlth_code_dry} g")
     print(f"Total water mass: {total_water} g")
     print(f"Total mass: {total_mass} g")
-    print(f"mass per portion: {mass_per_portion} g")
+    print(f"Mass per portion: {mass_per_portion} g")
 
 
 if __name__ == "__main__":
