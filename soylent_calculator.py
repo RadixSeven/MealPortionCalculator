@@ -25,6 +25,18 @@ def main():
     parser.add_argument(
         "final_portions", type=int, help="Final number of portions."
     )
+    # Recommended water is from:
+    # https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/water/art-20044256
+    parser.add_argument(
+        "--min-water",
+        type=int,
+        default=2800,
+        help=(
+            "Minimum number of grams of water. Default is 2800, "
+            "3700 g/2700 g are the recommended amount of "
+            "water per day for an adult male/female.)"
+        ),
+    )
     args = parser.parse_args()
 
     # Calculate number of Soylent and HLTH Code portions needed
@@ -46,7 +58,8 @@ def main():
     soylent_water_fl_oz = soylent_portions * SOYLENT_WATER_FL_OZ_PER_PORTION
     hlth_water_fl_oz = hlth_code_portions * HLTH_CODE_WATER_FL_OZ_PER_PORTION
     total_water_fl_oz = soylent_water_fl_oz + hlth_water_fl_oz
-    total_water = round(total_water_fl_oz * FL_OZ_TO_GRAMS)
+    total_water_g = round(total_water_fl_oz * FL_OZ_TO_GRAMS)
+    total_water = max(args.min_water, total_water_g)
 
     # Calculate total mass and mass per portion
     total_mass = total_soylent_dry + total_hlth_code_dry + total_water
