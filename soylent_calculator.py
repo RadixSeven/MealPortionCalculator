@@ -68,7 +68,7 @@ def main():
         soylent_portions * SOYLENT_CARBS_GRAMS_PER_PORTION
         + hlth_code_portions * HLTH_CODE_CARBS_GRAMS_PER_PORTION
     )
-    carbs_per_portion = round(total_carbs / args.final_portions)
+    carbs_per_portion = round(total_carbs / args.final_portions, 1)
 
     # Calculate total mass and mass per portion
     total_mass = total_soylent_dry + total_hlth_code_dry + total_water
