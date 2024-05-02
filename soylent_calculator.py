@@ -3,13 +3,15 @@
 import argparse
 
 # Constants for Soylent and HLTH Code
-SOYLENT_CALORIES_PER_PORTION = 1200 / 9
-SOYLENT_DRY_GRAMS_PER_PORTION = 270 / 9
-SOYLENT_WATER_FL_OZ_PER_PORTION = 36 / 9
+SOYLENT_CALORIES_PER_PORTION = 400 * 3 / 9
+SOYLENT_DRY_GRAMS_PER_PORTION = 90 * 3 / 9
+SOYLENT_WATER_FL_OZ_PER_PORTION = 12 * 3 / 9
+SOYLENT_CARBS_GRAMS_PER_PORTION = 36 * 3 / 9
 
 HLTH_CODE_CALORIES_PER_PORTION = 800 / 9
 HLTH_CODE_DRY_GRAMS_PER_PORTION = 156 / 9
 HLTH_CODE_WATER_FL_OZ_PER_PORTION = 16 / 9
+HLTH_CODE_CARBS_GRAMS_PER_PORTION = 0 / 9
 
 # Conversion factor from fluid ounces to grams (approximate)
 FL_OZ_TO_GRAMS = 28.3495231
@@ -61,6 +63,13 @@ def main():
     total_water_g = round(total_water_fl_oz * FL_OZ_TO_GRAMS)
     total_water = max(args.min_water, total_water_g)
 
+    # Calculate total carbs
+    total_carbs = (
+        soylent_portions * SOYLENT_CARBS_GRAMS_PER_PORTION
+        + hlth_code_portions * HLTH_CODE_CARBS_GRAMS_PER_PORTION
+    )
+    carbs_per_portion = round(total_carbs / args.final_portions)
+
     # Calculate total mass and mass per portion
     total_mass = total_soylent_dry + total_hlth_code_dry + total_water
     mass_per_portion = round(total_mass / args.final_portions)
@@ -71,6 +80,7 @@ def main():
     print(f"Total water mass: {total_water} g")
     print(f"Total mass: {total_mass} g")
     print(f"Mass per portion: {mass_per_portion} g")
+    print(f"Carbs per portion: {carbs_per_portion} g")
 
 
 if __name__ == "__main__":
