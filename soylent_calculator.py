@@ -74,6 +74,12 @@ def main():
     total_mass = total_soylent_dry + total_hlth_code_dry + total_water
     mass_per_portion = round(total_mass / args.final_portions)
 
+    # Calculate minimum mass for next level of carbs
+    next_level_of_carbs = int(carbs_per_portion) + 0.5
+    min_mass_for_next_level_of_carbs = round(
+        mass_per_portion * next_level_of_carbs / carbs_per_portion
+    )
+
     # Print results
     print(f"Soylent dry mass: {total_soylent_dry} g")
     print(f"HLTH Code dry mass: {total_hlth_code_dry} g")
@@ -81,6 +87,10 @@ def main():
     print(f"Total mass: {total_mass} g")
     print(f"Mass per portion: {mass_per_portion} g")
     print(f"Carbs per portion: {carbs_per_portion} g")
+    print(
+        f"Min mass for {next_level_of_carbs} g"
+        f"carbs: {min_mass_for_next_level_of_carbs} g"
+    )
 
 
 if __name__ == "__main__":
