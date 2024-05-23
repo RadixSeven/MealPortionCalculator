@@ -39,16 +39,33 @@ def main():
             "water per day for an adult male/female.)"
         ),
     )
+    parser.add_argument(
+        "--max-soylent",
+        type=float,
+        default=float("inf"),
+        help="Maximum dry mass of Soylent (in grams).",
+    )
+    parser.add_argument(
+        "--max-hlth-code",
+        type=float,
+        default=float("inf"),
+        help="Maximum dry mass of HLTH Code (in grams).",
+    )
     args = parser.parse_args()
 
     # Calculate number of Soylent and HLTH Code portions needed
     soylent_portions = min(
-        args.total_calories // SOYLENT_CALORIES_PER_PORTION, args.final_portions
+        args.total_calories // SOYLENT_CALORIES_PER_PORTION,
+        args.final_portions,
+        args.max_soylent // SOYLENT_DRY_GRAMS_PER_PORTION,
     )
     hlth_calories = args.total_calories - (
         soylent_portions * SOYLENT_CALORIES_PER_PORTION
     )
-    hlth_code_portions = hlth_calories / HLTH_CODE_CALORIES_PER_PORTION
+    hlth_code_portions = min(
+        hlth_calories / HLTH_CODE_CALORIES_PER_PORTION,
+        args.max_hlth_code / HLTH_CODE_DRY_GRAMS_PER_PORTION,
+    )
 
     # Calculate total mass of each ingredient
     # We round the numbers because our ability to measure out the final
@@ -63,12 +80,16 @@ def main():
     total_water_g = round(total_water_fl_oz * FL_OZ_TO_GRAMS)
     total_water = max(args.min_water, total_water_g)
 
-    # Calculate total carbs
+    # Calculate total carbs and calories
     total_carbs = (
         soylent_portions * SOYLENT_CARBS_GRAMS_PER_PORTION
         + hlth_code_portions * HLTH_CODE_CARBS_GRAMS_PER_PORTION
     )
     carbs_per_portion = round(total_carbs / args.final_portions, 1)
+    total_calories = round(
+        soylent_portions * SOYLENT_CALORIES_PER_PORTION
+        + hlth_code_portions * HLTH_CODE_CALORIES_PER_PORTION
+    )
 
     # Calculate total mass and mass per portion
     total_mass = total_soylent_dry + total_hlth_code_dry + total_water
@@ -88,9 +109,10 @@ def main():
     print(f"Mass per portion: {mass_per_portion} g")
     print(f"Carbs per portion: {carbs_per_portion} g")
     print(
-        f"Min mass for {next_level_of_carbs} g"
+        f"Min mass for {next_level_of_carbs} g "
         f"carbs: {min_mass_for_next_level_of_carbs} g"
     )
+    print(f"Total Calories: {total_calories}")
 
 
 if __name__ == "__main__":
