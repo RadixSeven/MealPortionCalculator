@@ -86,11 +86,10 @@ def main():
         + hlth_code_portions * HLTH_CODE_CALORIES_PER_PORTION
     )
 
-    # Calculate total mass and mass per portion
+    # Calculate required total mass and mass per portion
     required_total_mass = (
         total_soylent_dry + total_hlth_code_dry + required_total_water
     )
-    mass_per_portion = round(required_total_mass / args.final_portions)
 
     # Add water to reach minimum portion size
     extra_mass_to_reach_min_portion = max(
@@ -98,6 +97,9 @@ def main():
     )
     total_water_g = required_total_water + extra_mass_to_reach_min_portion
     total_mass = required_total_mass + extra_mass_to_reach_min_portion
+
+    # Calculate mass per portion
+    mass_per_portion = round(total_mass / args.final_portions)
 
     # Calculate minimum mass for next level of carbs
     next_level_of_carbs = int(carbs_per_portion) + 0.5
