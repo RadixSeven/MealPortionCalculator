@@ -27,17 +27,13 @@ def main():
     parser.add_argument(
         "final_portions", type=int, help="Final number of portions."
     )
-    # Recommended water is from:
-    # https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/water/art-20044256
     parser.add_argument(
-        "--min-water",
+        "--min-portion",
         type=int,
-        default=2800,
-        help=(
-            "Minimum number of grams of water. Default is 2800, "
-            "3700 g/2700 g are the recommended amount of "
-            "water per day for an adult male/female.)"
-        ),
+        default=270,
+        help="Minimum number of grams per portion."
+        "Adds water to reach this minimum."
+        "Set to 0 to ignore. Default 270.",
     )
     parser.add_argument(
         "--max-soylent",
@@ -77,8 +73,7 @@ def main():
     soylent_water_fl_oz = soylent_portions * SOYLENT_WATER_FL_OZ_PER_PORTION
     hlth_water_fl_oz = hlth_code_portions * HLTH_CODE_WATER_FL_OZ_PER_PORTION
     total_water_fl_oz = soylent_water_fl_oz + hlth_water_fl_oz
-    total_water_g = round(total_water_fl_oz * FL_OZ_TO_GRAMS)
-    total_water = max(args.min_water, total_water_g)
+    required_total_water = round(total_water_fl_oz * FL_OZ_TO_GRAMS)
 
     # Calculate total carbs and calories
     total_carbs = (
@@ -92,8 +87,17 @@ def main():
     )
 
     # Calculate total mass and mass per portion
-    total_mass = total_soylent_dry + total_hlth_code_dry + total_water
-    mass_per_portion = round(total_mass / args.final_portions)
+    required_total_mass = (
+        total_soylent_dry + total_hlth_code_dry + required_total_water
+    )
+    mass_per_portion = round(required_total_mass / args.final_portions)
+
+    # Add water to reach minimum portion size
+    extra_mass_to_reach_min_portion = max(
+        args.min_portion * args.final_portions - required_total_mass, 0
+    )
+    total_water_g = required_total_water + extra_mass_to_reach_min_portion
+    total_mass = required_total_mass + extra_mass_to_reach_min_portion
 
     # Calculate minimum mass for next level of carbs
     next_level_of_carbs = int(carbs_per_portion) + 0.5
@@ -104,7 +108,7 @@ def main():
     # Print results
     print(f"Soylent dry mass: {total_soylent_dry} g")
     print(f"HLTH Code dry mass: {total_hlth_code_dry} g")
-    print(f"Total water mass: {total_water} g")
+    print(f"Total water mass: {total_water_g} g")
     print(f"Total mass: {total_mass} g")
     print(f"Mass per portion: {mass_per_portion} g")
     print(f"Carbs per portion: {carbs_per_portion} g")
