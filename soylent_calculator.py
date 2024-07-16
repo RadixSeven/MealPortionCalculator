@@ -36,6 +36,13 @@ def main():
         "Set to 0 to ignore. Default 270.",
     )
     parser.add_argument(
+        "--max-portion",
+        type=int,
+        default=None,
+        help="Max number of grams per portion."
+        "Removes water to reach this maximum.",
+    )
+    parser.add_argument(
         "--max-soylent",
         type=float,
         default=float("inf"),
@@ -48,6 +55,9 @@ def main():
         help="Maximum dry mass of HLTH Code (in grams).",
     )
     args = parser.parse_args()
+
+    if args.max_portion is not None and args.min_portion > args.max_portion:
+        raise ValueError("Min portion cannot be larger than max portion.")
 
     # Calculate number of Soylent and HLTH Code portions needed
     soylent_portions = min(
@@ -90,13 +100,26 @@ def main():
     required_total_mass = (
         total_soylent_dry + total_hlth_code_dry + required_total_water
     )
+    if args.max_portion is None:
+        max_total_mass = required_total_mass
+    else:
+        max_total_mass = args.max_portion * args.final_portions
+        if max_total_mass < total_soylent_dry + total_hlth_code_dry:
+            raise ValueError(
+                "Max portion size cannot be reached by removing water."
+            )
 
     # Add water to reach minimum portion size
     extra_mass_to_reach_min_portion = max(
         args.min_portion * args.final_portions - required_total_mass, 0
     )
-    total_water_g = required_total_water + extra_mass_to_reach_min_portion
-    total_mass = required_total_mass + extra_mass_to_reach_min_portion
+    mass_to_remove = max(required_total_mass - max_total_mass, 0)
+    total_water_g = (
+        required_total_water + extra_mass_to_reach_min_portion - mass_to_remove
+    )
+    total_mass = (
+        required_total_mass + extra_mass_to_reach_min_portion - mass_to_remove
+    )
 
     # Calculate mass per portion
     mass_per_portion = round(total_mass / args.final_portions)
