@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
+import sys
 
 # Constants for Soylent and HLTH Code
 SOYLENT_CALORIES_PER_PORTION = 400 * 3 / 9
@@ -54,17 +55,31 @@ def main():
         default=float("inf"),
         help="Maximum dry mass of HLTH Code (in grams).",
     )
+    parser.add_argument(
+        "--max-carbs-per-portion",
+        type=float,
+        default=SOYLENT_CARBS_GRAMS_PER_PORTION,
+        help="Maximum number of grams of carbohydrates per portion.",
+    )
     args = parser.parse_args()
 
     if args.max_portion is not None and args.min_portion > args.max_portion:
         raise ValueError("Min portion cannot be larger than max portion.")
 
     # Calculate number of Soylent and HLTH Code portions needed
+    # Prefer Soylent portions over HLTH Code portions because
+    # Soylent is cheaper and matches actual vitamin requirements
+    # rather than having unnecessary vitamins.
+    #
+    # Limit maximum Soylent portions based on max carbs per portion
+    # Only Soylent has carbs, so this is only relevant for Soylent.
     soylent_portions = min(
-        args.total_calories // SOYLENT_CALORIES_PER_PORTION,
         args.final_portions,
-        args.max_soylent // SOYLENT_DRY_GRAMS_PER_PORTION,
+        args.max_soylent / SOYLENT_DRY_GRAMS_PER_PORTION,
+        (args.max_carbs_per_portion * args.final_portions)
+        / SOYLENT_CARBS_GRAMS_PER_PORTION,
     )
+
     hlth_calories = args.total_calories - (
         soylent_portions * SOYLENT_CALORIES_PER_PORTION
     )
@@ -72,6 +87,16 @@ def main():
         hlth_calories / HLTH_CODE_CALORIES_PER_PORTION,
         args.max_hlth_code / HLTH_CODE_DRY_GRAMS_PER_PORTION,
     )
+    mix_calories = (
+        soylent_portions * SOYLENT_CALORIES_PER_PORTION
+        + hlth_code_portions * HLTH_CODE_CALORIES_PER_PORTION
+    )
+    if abs(mix_calories - args.total_calories) > 0.5:
+        print(
+            "Warning: The calorie total does not match the requested calories."
+            f"Requested: {args.total_calories:.2f}, Actual: {mix_calories:.2f}",
+            file=sys.stderr,
+        )
 
     # Calculate total mass of each ingredient
     # We round the numbers because our ability to measure out the final
