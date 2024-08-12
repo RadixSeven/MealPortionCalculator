@@ -74,12 +74,11 @@ def main():
     # Limit maximum Soylent portions based on max carbs per portion
     # Only Soylent has carbs, so this is only relevant for Soylent.
     soylent_portions = min(
-        args.final_portions,
         args.max_soylent / SOYLENT_DRY_GRAMS_PER_PORTION,
         (args.max_carbs_per_portion * args.final_portions)
         / SOYLENT_CARBS_GRAMS_PER_PORTION,
+        args.total_calories / SOYLENT_CALORIES_PER_PORTION,
     )
-
     hlth_calories = args.total_calories - (
         soylent_portions * SOYLENT_CALORIES_PER_PORTION
     )
